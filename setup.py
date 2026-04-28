@@ -7,5 +7,5 @@ setup(
     author_email= 'arnavcode12@gmail.com',
     packages= find_packages(),
     install_requires = []
-    
+
 )
