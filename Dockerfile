@@ -2,23 +2,25 @@ FROM python:3.10-slim-buster
 
 WORKDIR /app
 
-# copy only requirements first (faster caching)
+# install system libs required for numpy / torch / transformers
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gcc \
+    git \
+    curl \
+    libgl1 \
+    libglib2.0-0
+
 COPY requirements.txt .
 
-# install system deps
-RUN apt-get update && apt-get install -y build-essential gcc
-
-# upgrade pip
 RUN pip install --upgrade pip
 
-# 🔴 IMPORTANT: install lightweight CPU PyTorch first
-RUN pip install --no-cache-dir torch==2.1.0 --index-url https://download.pytorch.org/whl/cpu
+# install torch CPU first (important)
+RUN pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2
 
-# install remaining libraries
+# install remaining python deps
 RUN pip install --no-cache-dir -r requirements.txt
 
-# now copy project files
 COPY . .
 
-# Railway uses dynamic PORT
 CMD gunicorn app:app --bind 0.0.0.0:$PORT
